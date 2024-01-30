@@ -1,1 +1,0 @@
-/home/wasix/dev/jones/target/debug/jones: /home/wasix/dev/jones/src/civ.rs /home/wasix/dev/jones/src/helpers.rs /home/wasix/dev/jones/src/logger.rs /home/wasix/dev/jones/src/main.rs /home/wasix/dev/jones/src/person.rs /home/wasix/dev/jones/src/world.rs

@@ -7,7 +7,7 @@ use crate::helpers::new_name;
 #[derive(Debug)]
 pub struct World {
     pub name: String, 
-    cities: Vec<Civ>,
+    pub cities: Vec<Civ>,
     pub diameter: i32,
 }  
 
@@ -36,6 +36,14 @@ impl World {
         for c in &mut self.cities {
             c.add_year();
             c.gen_pop();
+            c.next_state();
+            
+
+
+            println!("{} - {:?}", c.name, c.c_state);
+
+
+            
 
         }
         

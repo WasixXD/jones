@@ -1,8 +1,15 @@
 use crate::person::Person;
 use crate::helpers::new_name;
+use crate::world::World;
+
 
 use rand::Rng;
 use std::collections::HashMap;
+
+
+const BIRTH_RATE_GROWTH: f32 = 0.015f32;
+const BIRTH_RATE_SHRINK: f32 =  0.02f32;
+
 
 
 
@@ -14,6 +21,13 @@ pub enum CivStates {
 
 }
 
+pub struct Declaration {
+    pub civ_name: String,
+    pub enemy_name: Option<String>,
+    pub typeOf : CivStates,
+
+    pub why: String
+}
 
 
 
@@ -68,21 +82,21 @@ impl Civ {
             // TODO: Ugly
             states_prob: HashMap::from([
                     (CivStates::Peace, HashMap::from([
-                                                    (CivStates::Peace, 0.8),
-                                                    (CivStates::War, 0.6),
+                                                    (CivStates::Peace, 0.7),
+                                                    (CivStates::War, 0.3),
                                                     (CivStates::Research, 0.4),
                     ])),
 
                     (CivStates::War, HashMap::from([
                                                    (CivStates::Peace, 0.5),
-                                                   (CivStates::War, 0.6),
-                                                   (CivStates::Research, 0.3),
+                                                   (CivStates::War, 0.5),
+                                                   (CivStates::Research, 0.2),
                     ])),
 
                     (CivStates::Research, HashMap::from([
-                                                        (CivStates::Peace, 0.6),
+                                                        (CivStates::Peace, 0.4),
                                                         (CivStates::War, 0.2),
-                                                        (CivStates::Research, 0.4),
+                                                        (CivStates::Research, 0.7),
                     ])),
                 ]),
 
@@ -122,7 +136,7 @@ impl Civ {
         
 
         // Markov Chain
-        let mut randVal: f32 =r.gen();
+        let randVal: f32 =r.gen();
         let transitionProb= self.states_prob.get(&self.c_state).unwrap();
         let mut cumulativeProb = 0f32;
 
@@ -137,6 +151,53 @@ impl Civ {
         }
 
 
+
+    }
+
+
+    pub fn act(&mut self, civs: Vec<Civ> ) -> Declaration {
+
+        match self.c_state {
+            CivStates::Peace => {
+
+                // in peace the birth_rate grow
+                self.birth_rate += BIRTH_RATE_GROWTH;
+
+                Declaration {civ_name: self.name.clone(), enemy_name: None, typeOf: self.c_state.clone(), why: "não sei".to_string() }
+
+            },
+
+            CivStates::War => {
+                let mut r = rand::thread_rng();
+
+                // in war the birth_rate shrinks
+                self.birth_rate -= BIRTH_RATE_SHRINK;
+                
+
+                println!("WAR");
+
+                // search for a enemy
+                //
+                let mut enemy: Civ = self.clone();
+
+                if civs.len() > 1 {
+                    while enemy.name == self.name {
+                        let n = r.gen_range(0..civs.len());
+
+                        enemy = civs[n].clone();
+                    }
+
+                }
+
+                Declaration {civ_name: self.name.clone(), enemy_name: Some(enemy.name), typeOf: self.c_state.clone(), why: "guerra".to_string() }
+                
+            },
+            CivStates::Research => {
+
+
+                Declaration {civ_name: self.name.clone(), enemy_name: None, typeOf: self.c_state.clone(), why: "Pesquisa".to_string() }
+            },
+        }
     }
 
 
